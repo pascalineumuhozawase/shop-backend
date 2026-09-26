@@ -7,7 +7,7 @@ function publicUser(user) {
 }
 
 function makeToken(user) {
-  return jwt.sign({ sub: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' })
+  return jwt.sign({ sub: String(user.id), role: user.role }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' })
 }
 
 export async function register(request, response) {
@@ -25,7 +25,7 @@ export async function register(request, response) {
 }
 
 export async function login(request, response) {
-  const [rows] = await pool.execute('SELECT * FROM users WHERE email = ? AND is_active = 1', [request.body.email.toLowerCase()])
+  const [rows] = await pool.execute('SELECT * FROM users WHERE email = ? AND is_active = TRUE', [request.body.email.toLowerCase()])
   if (!rows.length || !(await bcrypt.compare(request.body.password, rows[0].password_hash))) {
     return response.status(401).json({ message: 'Email or password is incorrect.' })
   }

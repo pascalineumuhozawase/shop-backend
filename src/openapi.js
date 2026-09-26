@@ -111,6 +111,7 @@ const spec = {
       { name: 'search', in: 'query', schema: { type: 'string' } }, { name: 'category', in: 'query', description: 'Category id, slug, or case-insensitive name', schema: { type: 'string' } },
       { name: 'minPrice', in: 'query', schema: { type: 'number', minimum: 0 } }, { name: 'maxPrice', in: 'query', schema: { type: 'number', minimum: 0 } },
       { name: 'inStock', in: 'query', schema: { type: 'boolean' } }, { name: 'sort', in: 'query', schema: { type: 'string', enum: ['price-asc', 'price-desc', 'newest', 'popular'] } },
+      { name: 'featured', in: 'query', schema: { type: 'boolean' } },
     ] }) },
     '/api/products/{id}': { get: pathItem('Get product details', ['Products'], successResponse({ $ref: '#/components/schemas/Product' }), { parameters: [idParam], responses: { 200: jsonResponse('Product found', success({ $ref: '#/components/schemas/Product' })), 404: jsonResponse('Product not found', errorResponse) } }) },
     '/api/categories': { get: pathItem('List active categories', ['Categories'], successResponse({ type: 'array', items: { $ref: '#/components/schemas/Category' } })) },

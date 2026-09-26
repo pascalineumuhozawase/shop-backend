@@ -1,25 +1,31 @@
 import pool from '../config/db.js'
 
 const productFields = `p.id, p.name, p.description, p.price, p.stock,
-  p.image_url AS image, p.rating, p.popularity, p.is_new AS isNew,
-  p.is_featured AS isFeatured, p.is_active AS isActive, c.id AS categoryId, c.name AS category,
-  p.created_at AS createdAt`
+  p.image_url AS image, p.rating, p.popularity, p.is_new AS "isNew",
+  p.is_featured AS "isFeatured", p.is_active AS "isActive", c.id AS "categoryId", c.name AS category,
+  p.created_at AS "createdAt"`
 
-export async function findProducts({ search, category, minPrice, maxPrice, inStock, sort, page, limit, activeOnly = true }) {
+export async function findProducts({ search, category, minPrice, maxPrice, inStock, featured, sort, page, limit, activeOnly = true }) {
   const filters = []
   const values = []
-  if (activeOnly) filters.push('p.is_active = 1')
+  if (activeOnly) filters.push('p.is_active = TRUE')
   if (search) {
-    filters.push('(p.name LIKE ? OR p.description LIKE ?)')
+    filters.push('(p.name ILIKE ? OR p.description ILIKE ?)')
     values.push(`%${search}%`, `%${search}%`)
   }
   if (category && category !== 'all') {
-    filters.push('(c.id = ? OR LOWER(c.slug) = LOWER(?) OR LOWER(c.name) = LOWER(?))')
-    values.push(category, String(category), String(category))
+    if (/^\d+$/.test(String(category))) {
+      filters.push('(c.id = ? OR LOWER(c.slug) = LOWER(?) OR LOWER(c.name) = LOWER(?))')
+      values.push(category, String(category), String(category))
+    } else {
+      filters.push('(LOWER(c.slug) = LOWER(?) OR LOWER(c.name) = LOWER(?))')
+      values.push(String(category), String(category))
+    }
   }
   if (minPrice !== undefined && minPrice !== '') { filters.push('p.price >= ?'); values.push(Number(minPrice)) }
   if (maxPrice !== undefined && maxPrice !== '') { filters.push('p.price <= ?'); values.push(Number(maxPrice)) }
   if (inStock === true || inStock === 'true' || inStock === '1') filters.push('p.stock > 0')
+  if (featured === true || featured === 'true' || featured === '1') filters.push('p.is_featured = TRUE')
 
   const where = filters.length ? `WHERE ${filters.join(' AND ')}` : ''
   const orderBy = {
@@ -41,7 +47,7 @@ export async function findProducts({ search, category, minPrice, maxPrice, inSto
 
 export async function findProductById(id, { activeOnly = true, connection = pool } = {}) {
   const [rows] = await connection.execute(
-    `SELECT ${productFields} FROM products p JOIN categories c ON c.id = p.category_id WHERE p.id = ? ${activeOnly ? 'AND p.is_active = 1' : ''}`,
+    `SELECT ${productFields} FROM products p JOIN categories c ON c.id = p.category_id WHERE p.id = ? ${activeOnly ? 'AND p.is_active = TRUE' : ''}`,
     [id],
   )
   return rows[0] || null
@@ -49,10 +55,10 @@ export async function findProductById(id, { activeOnly = true, connection = pool
 
 export async function listCategories() {
   const [rows] = await pool.execute(
-    `SELECT c.id, c.name, c.slug, c.description, c.is_active AS isActive,
-      COUNT(p.id) AS productCount FROM categories c
-      LEFT JOIN products p ON p.category_id = c.id AND p.is_active = 1
-      WHERE c.is_active = 1 GROUP BY c.id ORDER BY c.name`,
+    `SELECT c.id, c.name, c.slug, c.description, c.is_active AS "isActive",
+      COUNT(p.id) AS "productCount" FROM categories c
+      LEFT JOIN products p ON p.category_id = c.id AND p.is_active = TRUE
+      WHERE c.is_active = TRUE GROUP BY c.id ORDER BY c.name`,
   )
   return rows
 }

@@ -6,9 +6,9 @@ function pageOptions(query) {
 }
 
 export async function stats(request, response) {
-  const [[products]] = await pool.execute('SELECT COUNT(*) AS total FROM products WHERE is_active = 1')
+  const [[products]] = await pool.execute('SELECT COUNT(*) AS total FROM products WHERE is_active = TRUE')
   const [[orders]] = await pool.execute('SELECT COUNT(*) AS total FROM orders')
-  const [[customers]] = await pool.execute("SELECT COUNT(*) AS total FROM users WHERE role = 'customer' AND is_active = 1")
+  const [[customers]] = await pool.execute("SELECT COUNT(*) AS total FROM users WHERE role = 'customer' AND is_active = TRUE")
   const [[revenue]] = await pool.execute("SELECT COALESCE(SUM(total), 0) AS total FROM orders WHERE status <> 'cancelled'")
   response.json({ data: { products: products.total, orders: orders.total, customers: customers.total, revenue: revenue.total } })
 }
@@ -18,7 +18,7 @@ export async function listOrders(request, response) {
   const search = String(request.query.search || '').trim()
   const filters = []
   const values = []
-  if (search) { filters.push('(CAST(o.id AS CHAR) LIKE ? OR o.customer_name LIKE ? OR o.customer_email LIKE ?)'); values.push(`%${search}%`, `%${search}%`, `%${search}%`) }
+  if (search) { filters.push('(CAST(o.id AS TEXT) ILIKE ? OR o.customer_name ILIKE ? OR o.customer_email ILIKE ?)'); values.push(`%${search}%`, `%${search}%`, `%${search}%`) }
   if (request.query.status) { filters.push('o.status = ?'); values.push(request.query.status) }
   const where = filters.length ? `WHERE ${filters.join(' AND ')}` : ''
   const [rows] = await pool.execute(`SELECT o.id FROM orders o ${where} ORDER BY o.created_at DESC LIMIT ? OFFSET ?`, [...values, limit, (page - 1) * limit])
@@ -62,11 +62,11 @@ export async function updateOrder(request, response) {
 export async function customers(request, response) {
   const { page, limit } = pageOptions(request.query)
   const search = String(request.query.search || '').trim()
-  const where = search ? 'WHERE u.role = \'customer\' AND (u.first_name LIKE ? OR u.last_name LIKE ? OR u.email LIKE ?)' : "WHERE u.role = 'customer'"
+  const where = search ? 'WHERE u.role = \'customer\' AND (u.first_name ILIKE ? OR u.last_name ILIKE ? OR u.email ILIKE ?)' : "WHERE u.role = 'customer'"
   const values = search ? [`%${search}%`, `%${search}%`, `%${search}%`] : []
   const [rows] = await pool.execute(
-    `SELECT u.id, u.first_name AS firstName, u.last_name AS lastName, u.email, u.phone,
-      u.created_at AS createdAt, COUNT(o.id) AS orderCount, COALESCE(SUM(CASE WHEN o.status <> 'cancelled' THEN o.total ELSE 0 END), 0) AS totalSpent
+    `SELECT u.id, u.first_name AS "firstName", u.last_name AS "lastName", u.email, u.phone,
+      u.created_at AS "createdAt", COUNT(o.id) AS "orderCount", COALESCE(SUM(CASE WHEN o.status <> 'cancelled' THEN o.total ELSE 0 END), 0) AS "totalSpent"
      FROM users u LEFT JOIN orders o ON o.user_id = u.id ${where}
      GROUP BY u.id ORDER BY u.created_at DESC LIMIT ? OFFSET ?`,
     [...values, limit, (page - 1) * limit],

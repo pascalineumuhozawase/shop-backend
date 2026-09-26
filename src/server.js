@@ -9,6 +9,6 @@ try {
   await pool.query('SELECT 1')
   app.listen(port, () => console.log(`Online Shopping API listening on port ${port}`))
 } catch (error) {
-  console.error(`Could not connect to MySQL: ${error.message}`)
+  console.error(`Could not connect to PostgreSQL: ${error.message}`)
   process.exit(1)
 }

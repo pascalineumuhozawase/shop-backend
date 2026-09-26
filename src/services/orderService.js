@@ -92,18 +92,18 @@ export async function getOrderById(orderId, userId = null) {
   const ownerFilter = userId === null ? '' : 'AND o.user_id = ?'
   const params = userId === null ? [orderId] : [orderId, userId]
   const [orders] = await pool.execute(
-    `SELECT o.id, o.user_id AS userId, o.customer_name AS customerName, o.customer_email AS email,
+    `SELECT o.id, o.user_id AS "userId", o.customer_name AS "customerName", o.customer_email AS email,
       o.customer_phone AS phone, o.shipping_address AS address, o.shipping_city AS city,
-      o.shipping_region AS region, o.shipping_postal_code AS postalCode, o.shipping_country AS country,
-      o.subtotal, o.shipping_fee AS shippingFee, o.total, o.payment_method AS paymentMethod,
-      o.payment_status AS paymentStatus, o.status, o.created_at AS createdAt
+      o.shipping_region AS region, o.shipping_postal_code AS "postalCode", o.shipping_country AS country,
+      o.subtotal, o.shipping_fee AS "shippingFee", o.total, o.payment_method AS "paymentMethod",
+      o.payment_status AS "paymentStatus", o.status, o.created_at AS "createdAt"
      FROM orders o WHERE o.id = ? ${ownerFilter}`,
     params,
   )
   if (!orders.length) return null
   const [items] = await pool.execute(
-    `SELECT id, product_id AS productId, product_name AS name, image_url AS image,
-      unit_price AS price, quantity, line_total AS lineTotal FROM order_items WHERE order_id = ?`,
+    `SELECT id, product_id AS "productId", product_name AS name, image_url AS image,
+      unit_price AS price, quantity, line_total AS "lineTotal" FROM order_items WHERE order_id = ?`,
     [orderId],
   )
   return { ...orders[0], items }

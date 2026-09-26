@@ -29,6 +29,10 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev', { ski
 
 app.get('/api/health', (request, response) => response.json({ data: { status: 'ok' } }))
 app.get('/api/openapi.json', (request, response) => response.json(openApiSpec))
+app.use('/api/docs', (request, response, next) => {
+	response.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self'")
+	next()
+})
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openApiSpec, {
 	customSiteTitle: 'Online Shopping API Documentation',
 	swaggerOptions: { persistAuthorization: true, displayRequestDuration: true },

@@ -15,7 +15,7 @@ export const requireAuth = asyncHandler(async (request, response, next) => {
   }
 
   const [users] = await pool.execute(
-    'SELECT id, first_name, last_name, email, phone, role, created_at FROM users WHERE id = ? AND is_active = 1',
+    'SELECT id, first_name, last_name, email, phone, role, created_at FROM users WHERE id = ? AND is_active = TRUE',
     [decoded.sub],
   )
   if (!users.length) return response.status(401).json({ message: 'This account is no longer available.' })
@@ -36,7 +36,7 @@ export const optionalAuth = asyncHandler(async (request, response, next) => {
   }
 
   const [users] = await pool.execute(
-    'SELECT id, first_name, last_name, email, phone, role, created_at FROM users WHERE id = ? AND is_active = 1',
+    'SELECT id, first_name, last_name, email, phone, role, created_at FROM users WHERE id = ? AND is_active = TRUE',
     [decoded.sub],
   )
   if (!users.length) return response.status(401).json({ message: 'This account is no longer available.' })
