@@ -13,7 +13,7 @@ router.get('/stats', asyncHandler(stats))
 router.get('/products', asyncHandler(adminList))
 router.post('/products/images', uploadProductImage.single('image'), (request, response) => {
 	if (!request.file) return response.status(400).json({ message: 'Choose a product image to upload.' })
-	response.status(201).json({ data: { imageUrl: `/uploads/${request.file.filename}` } })
+	response.status(201).json({ data: { imageUrl: `${request.protocol}://${request.get('host')}/uploads/${request.file.filename}` } })
 })
 router.post('/products', body('name').trim().notEmpty(), body('categoryId').isInt({ min: 1 }), body('price').isFloat({ min: 0 }), body('stock').optional().isInt({ min: 0 }), validate, asyncHandler(create))
 router.patch('/products/:id', body('price').optional().isFloat({ min: 0 }), body('stock').optional().isInt({ min: 0 }), validate, asyncHandler(update))

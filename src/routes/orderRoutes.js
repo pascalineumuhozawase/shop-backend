@@ -1,12 +1,12 @@
 import { Router } from 'express'
 import { body } from 'express-validator'
 import { create, getMine, mine } from '../controllers/orderController.js'
-import { requireAuth } from '../middleware/auth.js'
+import { optionalAuth, requireAuth } from '../middleware/auth.js'
 import { asyncHandler } from '../middleware/asyncHandler.js'
 import { validate } from '../middleware/validate.js'
 
 const router = Router()
-router.post('/',
+router.post('/', optionalAuth,
   body('items').isArray({ min: 1 }).withMessage('At least one order item is required.'),
   body('items.*.productId').isInt({ min: 1 }), body('items.*.quantity').isInt({ min: 1, max: 99 }),
   body('customer.firstName').trim().notEmpty(), body('customer.lastName').trim().notEmpty(),

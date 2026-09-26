@@ -3,8 +3,10 @@ import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import morgan from 'morgan'
+import swaggerUi from 'swagger-ui-express'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import openApiSpec from './openapi.js'
 import authRoutes from './routes/authRoutes.js'
 import userRoutes from './routes/userRoutes.js'
 import productRoutes from './routes/productRoutes.js'
@@ -26,6 +28,11 @@ app.use('/uploads', express.static(path.resolve(currentDirectory, '../uploads'),
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev', { skip: (request) => request.url === '/api/health' }))
 
 app.get('/api/health', (request, response) => response.json({ data: { status: 'ok' } }))
+app.get('/api/openapi.json', (request, response) => response.json(openApiSpec))
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openApiSpec, {
+	customSiteTitle: 'Online Shopping API Documentation',
+	swaggerOptions: { persistAuthorization: true, displayRequestDuration: true },
+}))
 app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/products', productRoutes)
