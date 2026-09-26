@@ -1,0 +1,24 @@
+# Environment files and local secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Uploaded product images and local runtime data
+uploads/*
+!uploads/.gitkeep
+
+# Logs and generated output
+logs/
+*.log
+npm-debug.log*
+dist/
+coverage/
+
+# Local editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
