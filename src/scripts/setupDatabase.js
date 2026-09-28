@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import pg from 'pg'
+import { applyDatabaseMigrations } from './migrations.js'
 
 const { Pool } = pg
 const databaseDirectory = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../database')
@@ -24,6 +25,7 @@ try {
     await client.query('BEGIN')
     await client.query(schema)
     await client.query(seed)
+    await applyDatabaseMigrations((sql) => client.query(sql))
     await client.query('COMMIT')
     console.log('PostgreSQL schema and sample data are ready.')
   } catch (error) {

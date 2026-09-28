@@ -8,7 +8,8 @@
     "start": "node src/server.js",
     "check": "node src/scripts/check.js",
     "create-admin": "node src/scripts/createAdmin.js",
-    "db:setup": "node src/scripts/setupDatabase.js"
+    "db:setup": "node src/scripts/setupDatabase.js",
+    "db:migrate": "node src/scripts/migrateDatabase.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

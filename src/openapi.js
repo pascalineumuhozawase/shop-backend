@@ -72,7 +72,7 @@ const spec = {
   servers: [{ url: 'http://localhost:5000', description: 'Local API' }],
   tags: [
     { name: 'Health' }, { name: 'Authentication' }, { name: 'Profile' }, { name: 'Products' },
-    { name: 'Categories' }, { name: 'Cart' }, { name: 'Orders' }, { name: 'Admin' },
+    { name: 'Categories' }, { name: 'Cart' }, { name: 'Wishlist' }, { name: 'Orders' }, { name: 'Admin' },
   ],
   components: {
     securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' } },
@@ -123,6 +123,11 @@ const spec = {
     '/api/cart/items/{productId}': {
       patch: pathItem('Set cart item quantity', ['Cart'], { 200: jsonResponse('Quantity updated', success({ type: 'object', properties: { productId: { type: 'integer' }, quantity: { type: 'integer' } } })), 400: jsonResponse('Invalid quantity', errorResponse), 401: jsonResponse('Authentication required', errorResponse), 404: jsonResponse('Item not in cart', errorResponse), 409: jsonResponse('Insufficient stock', errorResponse) }, { security: auth, parameters: [productIdParam], requestBody: jsonBody({ $ref: '#/components/schemas/QuantityUpdate' }) }),
       delete: pathItem('Remove item from cart', ['Cart'], successResponse({ type: 'object', properties: { removed: { type: 'boolean' } } }), { security: auth, parameters: [productIdParam] }),
+    },
+    '/api/wishlist': { get: pathItem('List saved products for the current account', ['Wishlist'], successResponse({ type: 'object', properties: { items: { type: 'array', items: { $ref: '#/components/schemas/Product' } } } }), { security: auth }) },
+    '/api/wishlist/items/{productId}': {
+      put: pathItem('Save a product to the current account wishlist', ['Wishlist'], { 201: jsonResponse('Product saved', success({ type: 'object', properties: { productId: { type: 'integer' } } })), 401: jsonResponse('Authentication required', errorResponse), 404: jsonResponse('Product not found', errorResponse) }, { security: auth, parameters: [productIdParam] }),
+      delete: pathItem('Remove a product from the current account wishlist', ['Wishlist'], successResponse({ type: 'object', properties: { removed: { type: 'boolean' } } }), { security: auth, parameters: [productIdParam] }),
     },
     '/api/orders': { post: pathItem('Place COD or mock-payment order; totals are recalculated and stock is updated transactionally', ['Orders'], { 201: jsonResponse('Order created', success({ type: 'object', properties: { order: { $ref: '#/components/schemas/Order' } } })), 400: jsonResponse('Invalid order', errorResponse), 401: jsonResponse('Invalid provided token', errorResponse), 409: jsonResponse('Insufficient stock', errorResponse) }, { security: [{ bearerAuth: [] }, {}], requestBody: jsonBody({ $ref: '#/components/schemas/OrderInput' }) }) },
     '/api/orders/me': { get: pathItem('List current account orders', ['Orders'], successResponse({ type: 'object', properties: { items: { type: 'array', items: { $ref: '#/components/schemas/Order' } } } }), { security: auth }) },
