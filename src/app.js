@@ -17,6 +17,7 @@ import adminRoutes from './routes/adminRoutes.js'
 import { errorHandler, notFound } from './middleware/errorHandler.js'
 
 const app = express()
+app.set('trust proxy', 1)
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url))
 const origins = (process.env.FRONTEND_ORIGIN || 'http://localhost:5173').split(',').map((origin) => origin.trim())
 
