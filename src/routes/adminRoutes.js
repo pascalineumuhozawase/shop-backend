@@ -23,6 +23,6 @@ router.post('/categories', body('name').trim().notEmpty(), validate, asyncHandle
 router.patch('/categories/:id', asyncHandler(updateCategory))
 router.delete('/categories/:id', asyncHandler(removeCategory))
 router.get('/orders', asyncHandler(listOrders))
-router.patch('/orders/:id', body('status').isIn(['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled']), validate, asyncHandler(updateOrder))
+router.patch('/orders/:id', body('status').optional().isIn(['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled']), body('paymentStatus').optional().isIn(['paid']), validate, asyncHandler(updateOrder))
 router.get('/customers', asyncHandler(customers))
 export default router

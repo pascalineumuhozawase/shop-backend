@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS orders (
   shipping_fee NUMERIC(10, 2) NOT NULL DEFAULT 0 CHECK (shipping_fee >= 0),
   total NUMERIC(10, 2) NOT NULL CHECK (total >= 0),
   payment_method VARCHAR(20) NOT NULL CHECK (payment_method IN ('cod', 'mock')),
-  payment_status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (payment_status IN ('pending', 'mock_paid', 'refunded', 'failed')),
+  payment_status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (payment_status IN ('pending', 'mock_paid', 'paid', 'refunded', 'failed')),
   status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS payments (
   id BIGSERIAL PRIMARY KEY,
   order_id BIGINT NOT NULL UNIQUE REFERENCES orders(id) ON DELETE CASCADE,
   method VARCHAR(20) NOT NULL CHECK (method IN ('cod', 'mock')),
-  status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'mock_paid', 'refunded', 'failed')),
+  status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'mock_paid', 'paid', 'refunded', 'failed')),
   amount NUMERIC(10, 2) NOT NULL CHECK (amount >= 0),
   reference VARCHAR(120),
   created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
